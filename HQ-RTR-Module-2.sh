@@ -90,7 +90,7 @@ if [ -f "$IPTABLES_CONF" ]; then
     
     log_and_echo ""
     log_and_echo "═══ Правила FORWARD ═══"
-    check_iptables_rule "\-A FORWARD -d 192.168.1.10/32 -p tcp -m tcp --dport 8080 -j ACCEPT" "FORWARD разрешён для 192.168.1.10:8080"
+    check_iptables_rule "\-A FORWARD -d 192.168.1.10/32 -p tcp -m tcp --dport 80 -j ACCEPT" "FORWARD разрешён для 192.168.1.10:80"
     check_iptables_rule "\-A FORWARD -d 192.168.1.10/32 -p tcp -m tcp --dport 2026 -j ACCEPT" "FORWARD разрешён для 192.168.1.10:2026"
     check_iptables_rule "\-A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT" "FORWARD RELATED,ESTABLISHED разрешён"
 else
