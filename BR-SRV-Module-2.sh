@@ -76,6 +76,24 @@ log_and_echo "└─────────────────────
 
 execute_check "Статус службы Samba" "systemctl status samba.service | grep 'Active: active'"
 
+# ==================== КРИТЕРИЙ 16/18: ВЕБ-СЕРВИСЫ ====================
+log_and_echo "┌──────────────────────────────────────────────────────────────┐"
+log_and_echo "│ КРИТЕРИЙ 16/18: Проверка веб-сервисов и прокси               │"
+log_and_echo "│ Описание: Веб-сервисы должны быть доступны напрямую          │"
+log_and_echo "│           и через прокси-сервер                              │"
+log_and_echo "└──────────────────────────────────────────────────────────────┘"
+
+# Проверка и установка curl
+if ! command -v curl > /dev/null; then
+    log_and_echo "Установка curl..."
+    apt-get update -qq && apt-get install curl -y -qq
+fi
+
+execute_check "Веб-сервис на BR-SRV (порт 8080)" "timeout 10 curl -I http://172.16.2.10:8080 | grep -i uvicorn"
+execute_check "Веб-сервис на HQ-SRV с авторизацией (порт 8080)" "timeout 10 curl -u WEB:P@ssw0rd http://172.16.1.10:8080"
+execute_check "Веб-сервис HQ-SRV через прокси (web.au-team.irpo)" "timeout 10 curl -u WEB:P@ssw0rd -s -f http://web.au-team.irpo"
+execute_check "Веб-сервис BR-SRV через прокси (docker.au-team.irpo)" "timeout 10 curl http://docker.au-team.irpo"
+
 # ==================== КРИТЕРИЙ 18: SSH И DOCKER ====================
 log_and_echo "┌──────────────────────────────────────────────────────────────┐"
 log_and_echo "│ КРИТЕРИЙ 18: Проверка SSH-подключения и Docker               │"
@@ -136,6 +154,8 @@ echo "  Критерий 12 (Ansible):      $(ansible all -m ping &>/dev/null &&
 echo "  Критерий 12 (NTP sync):     $(timedatectl | grep -q 'System clock synchronized: yes' && echo '✓ OK' || echo '✗ FAIL')"
 echo "  Критерий 14 (Samba users):  $(samba-tool user list 2>/dev/null | grep -q hquser && echo '✓ OK' || echo '✗ FAIL')"
 echo "  Критерий 15 (Samba AD):     $(systemctl is-active samba.service &>/dev/null && echo '✓ OK' || echo '✗ FAIL')"
+echo "  Критерий 16 (Прокси web):   $(timeout 5 curl -s -f http://web.au-team.irpo &>/dev/null && echo '✓ OK' || echo '✗ FAIL')"
+echo "  Критерий 18 (Docker web):   $(timeout 5 curl -s http://docker.au-team.irpo &>/dev/null && echo '✓ OK' || echo '✗ FAIL')"
 echo "  Критерий 18 (Docker):       $(docker ps 2>/dev/null | grep -q testapp && echo '✓ OK' || echo '✗ FAIL')"
 echo ""
 
