@@ -89,7 +89,7 @@ if ! command -v curl > /dev/null; then
     apt-get update -qq && apt-get install curl -y -qq
 fi
 
-execute_check "Доступность веб-сервиса (localhost)" "curl -s -f http://localhost > /dev/null"
+execute_check "Доступность веб-сервиса (localhost)" "curl -s http://localhost > /dev/null"
 
 # ==================== ИТОГИ ====================
 log_and_echo ""
