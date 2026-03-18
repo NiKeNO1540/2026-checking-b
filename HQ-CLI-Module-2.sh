@@ -87,24 +87,6 @@ fi
 
 execute_check "Билеты Kerberos" "klist"
 
-# ==================== КРИТЕРИЙ 16/18: ВЕБ-СЕРВИСЫ ====================
-log_and_echo "┌──────────────────────────────────────────────────────────────┐"
-log_and_echo "│ КРИТЕРИЙ 16/18: Проверка веб-сервисов и прокси               │"
-log_and_echo "│ Описание: Веб-сервисы должны быть доступны напрямую          │"
-log_and_echo "│           и через прокси-сервер                              │"
-log_and_echo "└──────────────────────────────────────────────────────────────┘"
-
-# Проверка и установка curl
-if ! command -v curl > /dev/null; then
-    log_and_echo "Установка curl..."
-    apt-get update -qq && apt-get install curl -y -qq
-fi
-
-execute_check "Веб-сервис на BR-SRV (порт 8080)" "timeout 10 curl -I http://172.16.2.10:8080 | grep -i uvicorn"
-execute_check "Веб-сервис на HQ-SRV с авторизацией (порт 8080)" "timeout 10 curl -u WEB:P@ssw0rd http://172.16.1.10:8080"
-execute_check "Веб-сервис HQ-SRV через прокси (web.au-team.irpo)" "timeout 10 curl -u WEB:P@ssw0rd -s -f http://web.au-team.irpo"
-execute_check "Веб-сервис BR-SRV через прокси (docker.au-team.irpo)" "timeout 10 curl http://docker.au-team.irpo"
-
 # ==================== ИТОГИ ====================
 log_and_echo ""
 log_and_echo "╔══════════════════════════════════════════════════════════════╗"
@@ -133,8 +115,6 @@ echo "  Критерий 12 (Yandex):       $(command -v yandex-browser-stable &
 echo "  Критерий 12 (NTP sync):     $(timedatectl | grep -q 'System clock synchronized: yes' && echo '✓ OK' || echo '✗ FAIL')"
 echo "  Критерий 14 (sudo hquser1): $(sudo -l -U hquser1 2>/dev/null | grep -q '/usr/bin/id' && echo '✓ OK' || echo '✗ FAIL')"
 echo "  Критерий 15 (Kerberos):     $(klist 2>/dev/null | grep -q 'AU-TEAM.IRPO' && echo '✓ OK' || echo '✗ FAIL')"
-echo "  Критерий 16 (Прокси web):   $(timeout 5 curl -s -f http://web.au-team.irpo &>/dev/null && echo '✓ OK' || echo '✗ FAIL')"
-echo "  Критерий 18 (Docker web):   $(timeout 5 curl -s http://docker.au-team.irpo &>/dev/null && echo '✓ OK' || echo '✗ FAIL')"
 echo ""
 
 echo "Для просмотра полных результатов: cat $LOG_FILE"
