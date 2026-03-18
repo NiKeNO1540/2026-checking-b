@@ -91,6 +91,22 @@ fi
 
 execute_check "Доступность веб-сервиса (localhost)" "curl -s http://localhost > /dev/null"
 
+# ==================== КРИТЕРИЙ 16/18: ВЕБ-СЕРВИСЫ ====================
+log_and_echo "┌──────────────────────────────────────────────────────────────┐"
+log_and_echo "│ КРИТЕРИЙ 16|18(HQ-SRV): Проверка веб-сервисов и прокси       │"
+log_and_echo "│ Описание: Веб-сервисы должны быть доступны напрямую          │"
+log_and_echo "│           и через прокси-сервер                              │"
+log_and_echo "└──────────────────────────────────────────────────────────────┘"
+
+# Проверка и установка curl
+if ! command -v curl > /dev/null; then
+    log_and_echo "Установка curl..."
+    apt-get update -qq && apt-get install curl -y -qq
+fi
+
+execute_check "Веб-сервис BR-SRV через прокси (docker.au-team.irpo)" "timeout 10 curl http://docker.au-team.irpo"
+execute_check "Веб-сервис на BR-SRV (порт 8080)" "timeout 10 curl -I http://172.16.2.10:8080 | grep -i uvicorn"
+
 # ==================== ИТОГИ ====================
 log_and_echo ""
 log_and_echo "╔══════════════════════════════════════════════════════════════╗"
@@ -119,6 +135,7 @@ echo "  Критерий 12 (NTP sync):     $(timedatectl | grep -q 'System cloc
 echo "  Критерий 13 (RAID md0):     $(lsblk | grep -q md0 && echo '✓ OK' || echo '✗ FAIL')"
 echo "  Критерий 13 (NFS export):   $(exportfs -v 2>/dev/null | grep -q '/raid/nfs' && echo '✓ OK' || echo '✗ FAIL')"
 echo "  Критерий 13 (NFS service):  $(systemctl is-active nfs-server &>/dev/null && echo '✓ OK' || echo '✗ FAIL')"
+echo "  Критерий 16 (Прокси web):   $(timeout 5 curl -s http://web.au-team.irpo &>/dev/null && echo '✓ OK' || echo '✗ FAIL')"
 echo ""
 
 echo "Для просмотра полных результатов: cat $LOG_FILE"
