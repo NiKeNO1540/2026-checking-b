@@ -50,7 +50,7 @@ check_iptables_rule() {
         return 1
     fi
     
-    if grep -qF "$pattern" "$IPTABLES_CONF" 2>/dev/null; then
+    if grep -qi "$pattern" "$IPTABLES_CONF" 2>/dev/null; then
         log_and_echo "  ✓ $description"
         return 0
     else
@@ -85,14 +85,14 @@ if [ -f "$IPTABLES_CONF" ]; then
     log_and_echo ""
     
     log_and_echo "═══ Правила PREROUTING (DNAT) ═══"
-    check_iptables_rule "-A PREROUTING -i enp7s1 -p tcp -m tcp --dport 8080 -j DNAT --to-destination 192.168.1.10:80" "DNAT порт 8080 → 192.168.1.10:80"
-    check_iptables_rule "-A PREROUTING -i enp7s1 -p tcp -m tcp --dport 2026 -j DNAT --to-destination 192.168.1.10:2026" "DNAT порт 2026 → 192.168.1.10:2026"
+    check_iptables_rule "\-A PREROUTING -i enp7s1 -p tcp -m tcp --dport 8080 -j DNAT --to-destination 192.168.1.10:80" "DNAT порт 8080 → 192.168.1.10:80"
+    check_iptables_rule "\-A PREROUTING -i enp7s1 -p tcp -m tcp --dport 2026 -j DNAT --to-destination 192.168.1.10:2026" "DNAT порт 2026 → 192.168.1.10:2026"
     
     log_and_echo ""
     log_and_echo "═══ Правила FORWARD ═══"
-    check_iptables_rule "-A FORWARD -d 192.168.1.10/32 -p tcp -m tcp --dport 8080 -j ACCEPT" "FORWARD разрешён для 192.168.1.10:8080"
-    check_iptables_rule "-A FORWARD -d 192.168.1.10/32 -p tcp -m tcp --dport 2026 -j ACCEPT" "FORWARD разрешён для 192.168.1.10:2026"
-    check_iptables_rule "-A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT" "FORWARD RELATED,ESTABLISHED разрешён"
+    check_iptables_rule "\-A FORWARD -d 192.168.1.10/32 -p tcp -m tcp --dport 8080 -j ACCEPT" "FORWARD разрешён для 192.168.1.10:8080"
+    check_iptables_rule "\-A FORWARD -d 192.168.1.10/32 -p tcp -m tcp --dport 2026 -j ACCEPT" "FORWARD разрешён для 192.168.1.10:2026"
+    check_iptables_rule "\-A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT" "FORWARD RELATED,ESTABLISHED разрешён"
 else
     log_and_echo "✗ Файл $IPTABLES_CONF не найден"
 fi
